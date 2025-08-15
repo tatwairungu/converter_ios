@@ -49,4 +49,7 @@ extension ConversionUnit {
     static let usd = ConversionUnit(id: "usd", name: "US Dollar", symbol: "USD", conversionFactor: 0.007, type: .currency) // Approximate
     static let eur = ConversionUnit(id: "eur", name: "Euro", symbol: "EUR", conversionFactor: 0.006, type: .currency) // Approximate
     static let gbp = ConversionUnit(id: "gbp", name: "British Pound", symbol: "GBP", conversionFactor: 0.005, type: .currency) // Approximate
+    static let jpy = ConversionUnit(id: "jpy", name: "Japanese Yen", symbol: "JPY", conversionFactor: 1.0, type: .currency) // Approximate
+    static let cad = ConversionUnit(id: "cad", name: "Canadian Dollar", symbol: "CAD", conversionFactor: 0.009, type: .currency) // Approximate
+    static let aud = ConversionUnit(id: "aud", name: "Australian Dollar", symbol: "AUD", conversionFactor: 0.010, type: .currency) // Approximate
 }

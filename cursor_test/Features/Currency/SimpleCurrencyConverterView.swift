@@ -1,5 +1,5 @@
 //
-//  CurrencyConverterView.swift
+//  SimpleCurrencyConverterView.swift
 //  cursor_test
 //
 //  Created by Tatwa on 14/08/2025.
@@ -7,9 +7,8 @@
 
 import SwiftUI
 
-struct CurrencyConverterView: View {
-    @StateObject private var viewModel = CurrencyConverterViewModel()
-    @State private var showingError = false
+struct SimpleCurrencyConverterView: View {
+    @StateObject private var viewModel = SimpleCurrencyViewModel()
     
     var body: some View {
         NavigationView {
@@ -46,9 +45,7 @@ struct CurrencyConverterView: View {
                     
                     // Refresh Button
                     Button(action: {
-                        Task {
-                            await viewModel.refreshExchangeRates()
-                        }
+                        viewModel.refreshExchangeRates()
                     }) {
                         HStack {
                             if viewModel.isLoading {
@@ -76,11 +73,20 @@ struct CurrencyConverterView: View {
                     
                     // Result Section
                     if viewModel.showResult && !viewModel.inputValue.isEmpty {
-                        ConversionResult(
-                            value: viewModel.resultValue,
-                            unit: viewModel.toUnit,
-                            description: viewModel.conversionDescription
-                        )
+                        VStack(spacing: KenyanTheme.Spacing.sm) {
+                            ConversionResult(
+                                value: viewModel.resultValue,
+                                unit: viewModel.toUnit,
+                                description: viewModel.conversionDescription
+                            )
+                            
+                            // Exchange Rate Info
+                            Text(viewModel.getConversionRate())
+                                .font(KenyanTheme.Typography.caption)
+                                .foregroundColor(KenyanTheme.Colors.secondary)
+                                .fontWeight(.medium)
+                                .padding(.horizontal)
+                        }
                     }
                     
                     // Loading State
@@ -88,7 +94,7 @@ struct CurrencyConverterView: View {
                         VStack(spacing: KenyanTheme.Spacing.sm) {
                             ProgressView()
                                 .scaleEffect(1.2)
-                            Text("Fetching live exchange rates...")
+                            Text("Updating exchange rates...")
                                 .font(KenyanTheme.Typography.body)
                                 .foregroundColor(KenyanTheme.Colors.text)
                         }
@@ -133,30 +139,14 @@ struct CurrencyConverterView: View {
             .onTapGesture {
                 hideKeyboard()
             }
-            .alert("Currency Error", isPresented: $showingError) {
-                Button("OK") {
-                    showingError = false
-                }
-            } message: {
-                Text(viewModel.errorMessage ?? "Unknown error occurred")
-            }
-            .onChange(of: viewModel.errorMessage) {
-                showingError = viewModel.errorMessage != nil
-            }
-            .task {
-                // Automatically fetch rates when view appears (if no recent data)
-                // Skip auto-refresh in preview mode to prevent crashes
-                #if !DEBUG
-                if viewModel.lastUpdated == nil || 
-                   Date().timeIntervalSince(viewModel.lastUpdated!) > 14400 { // 4 hours
-                    await viewModel.refreshExchangeRates()
-                }
-                #endif
-            }
         }
     }
     
     private func hideKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
+}
+
+#Preview {
+    SimpleCurrencyConverterView()
 }

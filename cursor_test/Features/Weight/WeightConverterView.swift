@@ -38,7 +38,7 @@ struct WeightConverterView: View {
                             RoundedRectangle(cornerRadius: KenyanTheme.CornerRadius.small)
                                 .stroke(KenyanTheme.Colors.primary, lineWidth: 2)
                         )
-                        .onChange(of: kilograms) { _ in
+                        .onChange(of: kilograms) {
                             convertWeight()
                         }
                 }
@@ -157,4 +157,8 @@ struct WeightConverterView: View {
     private func hideKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
+}
+
+#Preview {
+    WeightConverterView()
 }

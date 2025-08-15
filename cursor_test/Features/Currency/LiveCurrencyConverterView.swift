@@ -1,5 +1,5 @@
 //
-//  CurrencyConverterView.swift
+//  LiveCurrencyConverterView.swift
 //  cursor_test
 //
 //  Created by Tatwa on 14/08/2025.
@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-struct CurrencyConverterView: View {
-    @StateObject private var viewModel = CurrencyConverterViewModel()
+struct LiveCurrencyConverterView: View {
+    @StateObject private var viewModel = LiveCurrencyViewModel()
     @State private var showingError = false
     
     var body: some View {
@@ -21,6 +21,18 @@ struct CurrencyConverterView: View {
                         subtitle: viewModel.subtitle,
                         icon: ConverterType.currency.icon
                     )
+                    
+                    // Data Status Indicator
+                    if viewModel.isDataStale {
+                        HStack {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(.orange)
+                            Text("Data may be outdated - tap refresh for latest rates")
+                                .font(.caption)
+                                .foregroundColor(.orange)
+                        }
+                        .padding(.horizontal)
+                    }
                     
                     // Input Section
                     ConversionInput(
@@ -64,7 +76,16 @@ struct CurrencyConverterView: View {
                         .foregroundColor(KenyanTheme.Colors.background)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(KenyanTheme.Colors.primary)
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    KenyanTheme.Colors.primary,
+                                    viewModel.isDataStale ? .orange : KenyanTheme.Colors.primary
+                                ]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
                         .cornerRadius(KenyanTheme.CornerRadius.medium)
                         .overlay(
                             RoundedRectangle(cornerRadius: KenyanTheme.CornerRadius.medium)
@@ -76,11 +97,26 @@ struct CurrencyConverterView: View {
                     
                     // Result Section
                     if viewModel.showResult && !viewModel.inputValue.isEmpty {
-                        ConversionResult(
-                            value: viewModel.resultValue,
-                            unit: viewModel.toUnit,
-                            description: viewModel.conversionDescription
-                        )
+                        VStack(spacing: KenyanTheme.Spacing.sm) {
+                            ConversionResult(
+                                value: viewModel.resultValue,
+                                unit: viewModel.toUnit,
+                                description: viewModel.conversionDescription
+                            )
+                            
+                            // Exchange Rate Info
+                            VStack(spacing: KenyanTheme.Spacing.xs) {
+                                Text(viewModel.getConversionRate())
+                                    .font(KenyanTheme.Typography.caption)
+                                    .foregroundColor(KenyanTheme.Colors.secondary)
+                                    .fontWeight(.medium)
+                                
+                                Text("Data age: \(viewModel.dataAge)")
+                                    .font(.caption2)
+                                    .foregroundColor(.gray)
+                            }
+                            .padding(.horizontal)
+                        }
                     }
                     
                     // Loading State
@@ -143,20 +179,14 @@ struct CurrencyConverterView: View {
             .onChange(of: viewModel.errorMessage) {
                 showingError = viewModel.errorMessage != nil
             }
-            .task {
-                // Automatically fetch rates when view appears (if no recent data)
-                // Skip auto-refresh in preview mode to prevent crashes
-                #if !DEBUG
-                if viewModel.lastUpdated == nil || 
-                   Date().timeIntervalSince(viewModel.lastUpdated!) > 14400 { // 4 hours
-                    await viewModel.refreshExchangeRates()
-                }
-                #endif
-            }
         }
     }
     
     private func hideKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
+}
+
+#Preview {
+    LiveCurrencyConverterView()
 }
