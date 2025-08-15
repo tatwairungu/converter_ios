@@ -25,7 +25,7 @@ struct SimpleTabBarView: View {
                     Label("Temperature", systemImage: "thermometer")
                 }
             
-            SimpleCurrencyConverterView()
+            LiveCurrencyConverterView()
             .tabItem {
                 Label("Currency", systemImage: "dollarsign.circle")
             }

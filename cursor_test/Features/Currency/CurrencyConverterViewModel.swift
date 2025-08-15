@@ -8,13 +8,6 @@
 import Foundation
 import SwiftUI
 
-// MARK: - Exchange Rate Response Model
-struct ExchangeRateResponse: Codable {
-    let base: String
-    let date: String
-    let rates: [String: Double]
-}
-
 @MainActor
 class CurrencyConverterViewModel: ObservableObject {
     @Published var inputValue: String = ""
