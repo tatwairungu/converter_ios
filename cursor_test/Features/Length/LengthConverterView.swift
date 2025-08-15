@@ -8,54 +8,75 @@
 import SwiftUI
 
 struct LengthConverterView: View {
+    @StateObject private var viewModel = LengthConverterViewModel()
+    
     var body: some View {
         NavigationView {
-            VStack(spacing: KenyanTheme.Spacing.xl) {
-                // Header with Kenyan Flag Colors
-                KenyanFlagHeader(
-                    title: ConverterType.length.displayName + " Converter",
-                    subtitle: ConverterType.length.subtitle,
-                    icon: ConverterType.length.icon
-                )
-                
-                Spacer()
-                
-                // Placeholder content
+            ScrollView {
                 VStack(spacing: KenyanTheme.Spacing.lg) {
-                    Text("🚧 Coming Soon 🚧")
-                        .font(KenyanTheme.Typography.title)
-                        .foregroundColor(KenyanTheme.Colors.secondary)
+                    // Header with Kenyan Flag Colors
+                    KenyanFlagHeader(
+                        title: viewModel.title,
+                        subtitle: viewModel.subtitle,
+                        icon: ConverterType.length.icon
+                    )
                     
-                    Text("Length converter will be implemented in Phase 2")
-                        .font(KenyanTheme.Typography.body)
-                        .foregroundColor(KenyanTheme.Colors.text)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                }
-                
-                Spacer()
-                
-                // Info Section with Kenyan Flag Accent
-                VStack(spacing: KenyanTheme.Spacing.sm) {
-                    HStack(spacing: 0) {
-                        Rectangle()
-                            .fill(KenyanTheme.Colors.kenyanBlack)
-                            .frame(width: 30, height: 4)
-                        Rectangle()
-                            .fill(KenyanTheme.Colors.secondary)
-                            .frame(width: 30, height: 4)
-                        Rectangle()
-                            .fill(KenyanTheme.Colors.primary)
-                            .frame(width: 30, height: 4)
+                    // Input Section
+                    ConversionInput(
+                        value: $viewModel.inputValue,
+                        unit: viewModel.fromUnit,
+                        placeholder: "0.0",
+                        onChanged: viewModel.onInputChanged
+                    )
+                    
+                    // Unit Selection
+                    UnitSelector(
+                        fromUnit: $viewModel.fromUnit,
+                        toUnit: $viewModel.toUnit,
+                        availableUnits: viewModel.availableUnits,
+                        onSwap: viewModel.swapUnits
+                    )
+                    .onChange(of: viewModel.fromUnit) {
+                        viewModel.onFromUnitChanged()
                     }
-                    .cornerRadius(2)
+                    .onChange(of: viewModel.toUnit) {
+                        viewModel.onToUnitChanged()
+                    }
                     
-                    Text("1 m = 3.28 ft")
-                        .font(KenyanTheme.Typography.caption)
-                        .foregroundColor(KenyanTheme.Colors.text)
-                        .fontWeight(.medium)
+                    // Result Section
+                    if viewModel.showResult && !viewModel.inputValue.isEmpty {
+                        ConversionResult(
+                            value: viewModel.resultValue,
+                            unit: viewModel.toUnit,
+                            description: viewModel.conversionDescription
+                        )
+                    }
+                    
+                    Spacer(minLength: KenyanTheme.Spacing.xl)
+                    
+                    // Info Section with Kenyan Flag Accent
+                    VStack(spacing: KenyanTheme.Spacing.sm) {
+                        HStack(spacing: 0) {
+                            Rectangle()
+                                .fill(KenyanTheme.Colors.kenyanBlack)
+                                .frame(width: 30, height: 4)
+                            Rectangle()
+                                .fill(KenyanTheme.Colors.secondary)
+                                .frame(width: 30, height: 4)
+                            Rectangle()
+                                .fill(KenyanTheme.Colors.primary)
+                                .frame(width: 30, height: 4)
+                        }
+                        .cornerRadius(2)
+                        
+                        Text(viewModel.conversionInfo)
+                            .font(KenyanTheme.Typography.caption)
+                            .foregroundColor(KenyanTheme.Colors.text)
+                            .fontWeight(.medium)
+                    }
+                    .padding(.bottom)
                 }
-                .padding(.bottom)
+                .padding(.vertical)
             }
             .background(
                 LinearGradient(
@@ -65,6 +86,13 @@ struct LengthConverterView: View {
                 )
             )
             .navigationBarHidden(true)
+            .onTapGesture {
+                hideKeyboard()
+            }
         }
+    }
+    
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
