@@ -27,8 +27,26 @@ struct ConversionInput: View {
                     .font(.title2)
                     .multilineTextAlignment(.center)
                     .onChange(of: value) {
+                        // Basic input validation - only allow numbers and decimal points
+                        let filtered = value.filter { "0123456789.".contains($0) }
+                        if filtered != value {
+                            value = filtered
+                        }
                         onChanged()
                     }
+                
+                // Clear button
+                if !value.isEmpty {
+                    Button(action: {
+                        value = ""
+                        onChanged()
+                    }) {
+                        Image(systemName: "multiply.circle.fill")
+                            .foregroundColor(KenyanTheme.Colors.secondary)
+                            .font(.title3)
+                    }
+                    .transition(.opacity)
+                }
                 
                 Text(unit.symbol)
                     .font(.title2)
@@ -40,8 +58,12 @@ struct ConversionInput: View {
             .background(KenyanTheme.Colors.background)
             .overlay(
                 RoundedRectangle(cornerRadius: KenyanTheme.CornerRadius.small)
-                    .stroke(KenyanTheme.Colors.primary, lineWidth: 2)
+                    .stroke(
+                        value.isEmpty ? KenyanTheme.Colors.primary : KenyanTheme.Colors.secondary,
+                        lineWidth: value.isEmpty ? 2 : 3
+                    )
             )
+            .animation(.easeInOut(duration: 0.2), value: value.isEmpty)
         }
         .padding(.horizontal)
     }

@@ -25,11 +25,19 @@ struct ConversionUnit: Identifiable, Codable, Hashable {
 
 // MARK: - Predefined Units
 extension ConversionUnit {
-    // MARK: - Weight Units (base: grams)
-    static let kilograms = ConversionUnit(id: "kg", name: "Kilograms", symbol: "kg", conversionFactor: 1000.0, type: .weight)
-    static let grams = ConversionUnit(id: "g", name: "Grams", symbol: "g", conversionFactor: 1.0, type: .weight)
-    static let pounds = ConversionUnit(id: "lbs", name: "Pounds", symbol: "lbs", conversionFactor: 453.592, type: .weight)
-    static let ounces = ConversionUnit(id: "oz", name: "Ounces", symbol: "oz", conversionFactor: 28.3495, type: .weight)
+    // MARK: - Weight Units (base: kilograms for ViewModel compatibility)
+    static let kilogram = ConversionUnit(id: "kg", name: "Kilogram", symbol: "kg", conversionFactor: 1.0, type: .weight)
+    static let gram = ConversionUnit(id: "g", name: "Gram", symbol: "g", conversionFactor: 0.001, type: .weight)
+    static let pound = ConversionUnit(id: "lbs", name: "Pound", symbol: "lbs", conversionFactor: 0.453592, type: .weight)
+    static let ounce = ConversionUnit(id: "oz", name: "Ounce", symbol: "oz", conversionFactor: 0.0283495, type: .weight)
+    static let stone = ConversionUnit(id: "st", name: "Stone", symbol: "st", conversionFactor: 6.35029, type: .weight)
+    static let ton = ConversionUnit(id: "t", name: "Metric Ton", symbol: "t", conversionFactor: 1000.0, type: .weight)
+    
+    // MARK: - Legacy Weight Units (for backwards compatibility)
+    static let kilograms = kilogram
+    static let grams = gram
+    static let pounds = pound
+    static let ounces = ounce
     
     // MARK: - Length Units (base: meters)
     static let meters = ConversionUnit(id: "m", name: "Meters", symbol: "m", conversionFactor: 1.0, type: .length)
