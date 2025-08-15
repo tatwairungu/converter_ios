@@ -9,10 +9,12 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        TabBarView()
+        // Use simple tab view to prevent crashes during development
+        SimpleTabBarView()
     }
 }
 
 #Preview {
     ContentView()
+        .preferredColorScheme(.light)
 }
