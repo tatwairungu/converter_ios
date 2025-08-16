@@ -42,13 +42,13 @@
 ## 📱 Screenshots
 
 <p align="center">
-  ![Image 16-08-2025 at 21 02 (1)](https://github.com/user-attachments/assets/9969eec3-a1e4-4cd9-bda8-479435cae1db)
-![Image 16-08-2025 at 20 30](https://github.com/user-attachments/assets/2c664050-94f7-4086-8b8f-dfcc0598e84a)
-![Image 16-08-2025 at 20 57](https://github.com/user-attachments/assets/9d17d866-4c0a-4387-ac2b-7ca233e366ca)
-![Image 16-08-2025 at 21 01-2](https://github.com/user-attachments/assets/d0592b4f-98c8-4ff6-a8b6-67826cbabdcf)
-![Image 16-08-2025 at 21 00](https://github.com/user-attachments/assets/6f356319-4e23-4740-981e-4e56dced967d)
-![Image 16-08-2025 at 21 01](https://github.com/user-attachments/assets/3f3cc4ab-0045-42f6-aa54-8d4b8fee0d79)
-![Image 16-08-2025 at 21 02](https://github.com/user-attachments/assets/48112f10-e93b-4981-8146-f111abe7634a)
+<img src="https://github.com/user-attachments/assets/9969eec3-a1e4-4cd9-bda8-479435cae1db">
+<img src="https://github.com/user-attachments/assets/2c664050-94f7-4086-8b8f-dfcc0598e84a">
+<img src="https://github.com/user-attachments/assets/9d17d866-4c0a-4387-ac2b-7ca233e366ca">
+<img src="https://github.com/user-attachments/assets/d0592b4f-98c8-4ff6-a8b6-67826cbabdcf">
+<img src="https://github.com/user-attachments/assets/6f356319-4e23-4740-981e-4e56dced967d">
+<img src="https://github.com/user-attachments/assets/3f3cc4ab-0045-42f6-aa54-8d4b8fee0d79">
+<img src="https://github.com/user-attachments/assets/48112f10-e93b-4981-8146-f111abe7634a">
 </p>
 
 ## 🏗️ Architecture
@@ -207,11 +207,4 @@ Built with pride in Kenya, celebrating our heritage through thoughtful design an
 
 ---
 
-## 📊 Project Stats
 
-![GitHub repo size](https://img.shields.io/github/repo-size/yourusername/kenya-converter)
-![GitHub code size](https://img.shields.io/github/languages/code-size/yourusername/kenya-converter)
-![GitHub top language](https://img.shields.io/github/languages/top/yourusername/kenya-converter)
-![GitHub last commit](https://img.shields.io/github/last-commit/yourusername/kenya-converter)
-
-**Ready for App Store! 🚀**
