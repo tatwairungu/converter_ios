@@ -12,59 +12,146 @@ struct ConversionInput: View {
     let unit: ConversionUnit
     let placeholder: String
     let onChanged: () -> Void
+    @FocusState private var isFocused: Bool
+    @State private var hasError = false
+    
+    private var isValidInput: Bool {
+        guard !value.isEmpty else { return true }
+        return Double(value) != nil
+    }
+    
+    private var unitHint: String {
+        unit.symbol
+    }
     
     var body: some View {
-        VStack(spacing: KenyanTheme.Spacing.md) {
-            Text("Enter value in \(unit.name)")
-                .font(KenyanTheme.Typography.headline)
-                .foregroundColor(KenyanTheme.Colors.text)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
+        VStack(spacing: KenyanTheme.Spacing.sm) {
+            // Label
             HStack {
-                TextField(placeholder, text: $value)
+                Text("Value")
+                    .font(KenyanTheme.Typography.title)
+                    .foregroundColor(KenyanTheme.Colors.text)
+                Spacer()
+            }
+            
+            // Input field with unit hint
+            HStack(spacing: KenyanTheme.Spacing.sm) {
+                TextField("", text: $value)
                     .textFieldStyle(PlainTextFieldStyle())
                     .keyboardType(.decimalPad)
-                    .font(.title2)
-                    .multilineTextAlignment(.center)
-                    .onChange(of: value) {
-                        // Basic input validation - only allow numbers and decimal points
-                        let filtered = value.filter { "0123456789.".contains($0) }
-                        if filtered != value {
-                            value = filtered
+                    .font(KenyanTheme.Typography.body)
+                    .multilineTextAlignment(.trailing)
+                    .focused($isFocused)
+                    .foregroundColor(KenyanTheme.Colors.text)
+                    .overlay(
+                        // Custom placeholder with improved contrast
+                        Group {
+                            if value.isEmpty {
+                                HStack {
+                                    Spacer()
+                                    Text(placeholder)
+                                        .foregroundColor(KenyanTheme.Colors.mutedText.opacity(0.8))
+                                        .font(KenyanTheme.Typography.body)
+                                        .allowsHitTesting(false)
+                                    Spacer()
+                                }
+                            }
                         }
-                        onChanged()
+                    )
+                    .accessibilityLabel("Value input field for \(unit.name)")
+                    .accessibilityHint("Enter the number you want to convert")
+                    .onChange(of: value) {
+                        validateAndUpdate()
+                    }
+                    .toolbar {
+                        ToolbarItemGroup(placement: .keyboard) {
+                            Spacer()
+                            Button("Done") {
+                                isFocused = false
+                            }
+                            .foregroundColor(KenyanTheme.Colors.primary)
+                        }
                     }
                 
-                // Clear button
-                if !value.isEmpty {
-                    Button(action: {
-                        value = ""
-                        onChanged()
-                    }) {
-                        Image(systemName: "multiply.circle.fill")
-                            .foregroundColor(KenyanTheme.Colors.secondary)
-                            .font(.title3)
-                    }
-                    .transition(.opacity)
-                }
-                
-                Text(unit.symbol)
-                    .font(.title2)
-                    .foregroundColor(KenyanTheme.Colors.primary)
+                // Live unit chip (updates with swaps)
+                Text(unitHint)
+                    .font(.caption)
                     .fontWeight(.semibold)
-                    .padding(.trailing, KenyanTheme.Spacing.sm)
+                    .foregroundColor(KenyanTheme.Colors.primary)
+                    .padding(.horizontal, KenyanTheme.Spacing.sm)
+                    .padding(.vertical, 4)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(KenyanTheme.Colors.primary.opacity(0.1))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(KenyanTheme.Colors.primary.opacity(0.3), lineWidth: 1)
+                            )
+                    )
+                    .animation(.easeInOut(duration: 0.2), value: unit.symbol)
             }
             .padding()
-            .background(KenyanTheme.Colors.background)
+            .frame(height: KenyanTheme.Spacing.inputHeight)
+            .background(KenyanTheme.Colors.adaptiveSurface)
             .overlay(
-                RoundedRectangle(cornerRadius: KenyanTheme.CornerRadius.small)
+                RoundedRectangle(cornerRadius: KenyanTheme.CornerRadius.medium)
                     .stroke(
-                        value.isEmpty ? KenyanTheme.Colors.primary : KenyanTheme.Colors.secondary,
-                        lineWidth: value.isEmpty ? 2 : 3
+                        hasError ? KenyanTheme.Colors.secondary :
+                        isFocused ? KenyanTheme.Colors.primary :
+                        KenyanTheme.Colors.border,
+                        lineWidth: isFocused || hasError ? 2 : 1
                     )
             )
-            .animation(.easeInOut(duration: 0.2), value: value.isEmpty)
+            .animation(.easeInOut(duration: KenyanTheme.Animation.fast), value: isFocused)
+            .animation(.easeInOut(duration: KenyanTheme.Animation.fast), value: hasError)
+            
+            // Error message or helper text
+            HStack {
+                if hasError {
+                    Text("Enter a valid number (e.g., 36.6)")
+                        .font(KenyanTheme.Typography.caption)
+                        .foregroundColor(KenyanTheme.Colors.secondary)
+                } else if value.isEmpty {
+                    Text("Enter a number to convert")
+                        .font(KenyanTheme.Typography.caption)
+                        .foregroundColor(KenyanTheme.Colors.mutedText)
+                }
+                Spacer()
+            }
         }
-        .padding(.horizontal)
+        .padding(.horizontal, KenyanTheme.Spacing.md)
+    }
+    
+    private func validateAndUpdate() {
+        // Input validation - only allow numbers and one decimal point
+        let filtered = value.filter { "0123456789.".contains($0) }
+        
+        // Ensure only one decimal point
+        let decimalCount = filtered.filter { $0 == "." }.count
+        if decimalCount <= 1 {
+            value = filtered
+        } else {
+            // Remove extra decimal points
+            let components = filtered.components(separatedBy: ".")
+            if components.count > 2 {
+                value = components[0] + "." + components[1...].joined()
+            }
+        }
+        
+        // Update error state
+        let newErrorState = !isValidInput
+        if newErrorState != hasError {
+            withAnimation(.easeInOut(duration: KenyanTheme.Animation.fast)) {
+                hasError = newErrorState
+            }
+            
+            // Haptic feedback for errors
+            if newErrorState {
+                let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                impactFeedback.impactOccurred()
+            }
+        }
+        
+        onChanged()
     }
 }

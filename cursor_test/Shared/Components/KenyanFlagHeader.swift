@@ -9,42 +9,56 @@ import SwiftUI
 
 struct KenyanFlagHeader: View {
     let title: String
-    let subtitle: String
+    let subtitle: String?
     let icon: String
     
+    init(title: String, subtitle: String? = nil, icon: String) {
+        self.title = title
+        self.subtitle = subtitle
+        self.icon = icon
+    }
+    
     var body: some View {
-        VStack(spacing: KenyanTheme.Spacing.md) {
-            // Flag-inspired header bar
-            HStack(spacing: 0) {
-                Rectangle()
-                    .fill(KenyanTheme.Colors.kenyanBlack)
-                    .frame(height: 8)
-                Rectangle()
-                    .fill(KenyanTheme.Colors.kenyanRed)
-                    .frame(height: 8)
-                Rectangle()
-                    .fill(KenyanTheme.Colors.kenyanGreen)
-                    .frame(height: 8)
-            }
-            .cornerRadius(4)
-            .padding(.horizontal)
-            
-            // Icon and titles
-            VStack(spacing: KenyanTheme.Spacing.sm) {
+        HStack(spacing: KenyanTheme.Spacing.md) {
+            // Icon with subtle Kenyan flag branding
+            ZStack {
+                // Centered flag stripe background (behind icon)
+                VStack(spacing: 1) {
+                    Rectangle()
+                        .fill(KenyanTheme.Colors.kenyanBlack)
+                        .frame(width: 24, height: 2)
+                    Rectangle()
+                        .fill(KenyanTheme.Colors.secondary)
+                        .frame(width: 24, height: 2)
+                    Rectangle()
+                        .fill(KenyanTheme.Colors.primary)
+                        .frame(width: 24, height: 2)
+                }
+                .opacity(0.15)
+                
+                // Icon in front
                 Image(systemName: icon)
-                    .font(.system(size: 60))
+                    .font(.title2)
                     .foregroundColor(KenyanTheme.Colors.primary)
-                
-                Text(title)
-                    .font(KenyanTheme.Typography.largeTitle)
-                    .foregroundColor(KenyanTheme.Colors.text)
-                
-                Text(subtitle)
-                    .font(KenyanTheme.Typography.headline)
-                    .foregroundColor(KenyanTheme.Colors.secondary)
-                    .fontWeight(.medium)
             }
+            
+            // Title and subtitle
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(KenyanTheme.Typography.title)
+                    .foregroundColor(KenyanTheme.Colors.text)
+                    .fontWeight(.semibold)
+                
+                if let subtitle = subtitle {
+                    Text(subtitle)
+                        .font(KenyanTheme.Typography.caption)
+                        .foregroundColor(KenyanTheme.Colors.mutedText)
+                }
+            }
+            
+            Spacer()
         }
-        .padding(.top, KenyanTheme.Spacing.lg)
+        .padding(.horizontal, KenyanTheme.Spacing.md)
+        .frame(height: KenyanTheme.Spacing.headerHeight)
     }
 }

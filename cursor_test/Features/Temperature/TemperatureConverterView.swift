@@ -10,101 +10,87 @@ import SwiftUI
 struct TemperatureConverterView: View {
     @StateObject private var viewModel = TemperatureConverterViewModel()
     
+    @State private var keyboardOffset: CGFloat = 0
+    
     var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(spacing: KenyanTheme.Spacing.lg) {
-                    // Header with Kenyan Flag Colors
-                    KenyanFlagHeader(
-                        title: viewModel.title,
-                        subtitle: viewModel.subtitle,
-                        icon: ConverterType.temperature.icon
-                    )
-                    
-                    // Input Section
-                    ConversionInput(
-                        value: $viewModel.inputValue,
-                        unit: viewModel.fromUnit,
-                        placeholder: "0.0",
-                        onChanged: viewModel.onInputChanged
-                    )
-                    
-                    // Unit Selection
-                    UnitSelector(
-                        fromUnit: $viewModel.fromUnit,
-                        toUnit: $viewModel.toUnit,
-                        availableUnits: viewModel.availableUnits,
-                        onSwap: viewModel.swapUnits
-                    )
-                    .onChange(of: viewModel.fromUnit) {
-                        viewModel.onFromUnitChanged()
-                    }
-                    .onChange(of: viewModel.toUnit) {
-                        viewModel.onToUnitChanged()
-                    }
-                    
-                    // Result Section with Temperature Context
-                    if viewModel.showResult && !viewModel.inputValue.isEmpty {
-                        VStack(spacing: KenyanTheme.Spacing.sm) {
-                            ConversionResult(
-                                value: viewModel.resultValue,
-                                unit: viewModel.toUnit,
-                                description: viewModel.conversionDescription
-                            )
-                            
-                            // Weather Context
-                            if let inputTemp = Double(viewModel.inputValue) {
-                                let celsiusTemp = viewModel.fromUnit.id == "c" ? inputTemp :
-                                                 viewModel.fromUnit.id == "f" ? (inputTemp - 32) * 5/9 :
-                                                 inputTemp - 273.15
-                                
-                                Text(viewModel.getTemperatureContext(celsius: celsiusTemp))
-                                    .font(KenyanTheme.Typography.headline)
-                                    .foregroundColor(KenyanTheme.Colors.secondary)
-                                    .padding(.horizontal)
-                            }
-                        }
-                    }
-                    
-                    Spacer(minLength: KenyanTheme.Spacing.xl)
-                    
-                    // Info Section with Kenyan Flag Accent
-                    VStack(spacing: KenyanTheme.Spacing.sm) {
-                        HStack(spacing: 0) {
-                            Rectangle()
-                                .fill(KenyanTheme.Colors.kenyanBlack)
-                                .frame(width: 30, height: 4)
-                            Rectangle()
-                                .fill(KenyanTheme.Colors.secondary)
-                                .frame(width: 30, height: 4)
-                            Rectangle()
-                                .fill(KenyanTheme.Colors.primary)
-                                .frame(width: 30, height: 4)
-                        }
-                        .cornerRadius(2)
-                        
-                        Text(viewModel.conversionInfo)
-                            .font(KenyanTheme.Typography.caption)
-                            .foregroundColor(KenyanTheme.Colors.text)
-                            .fontWeight(.medium)
-                            .multilineTextAlignment(.center)
-                    }
-                    .padding(.bottom)
-                }
-                .padding(.vertical)
-            }
-            .background(
-                LinearGradient(
-                    gradient: Gradient(colors: [KenyanTheme.Colors.background, Color.gray.opacity(0.05)]),
-                    startPoint: .top,
-                    endPoint: .bottom
+        VStack(spacing: 0) {
+            // Above-the-fold layout (no scrolling needed)
+            VStack(spacing: KenyanTheme.Spacing.lg) {
+                // Header
+                KenyanFlagHeader(
+                    title: viewModel.title,
+                    subtitle: viewModel.subtitle,
+                    icon: ConverterType.temperature.icon
                 )
-            )
-            .navigationBarHidden(true)
+                
+                // Value input
+                ConversionInput(
+                    value: $viewModel.inputValue,
+                    unit: viewModel.fromUnit,
+                    placeholder: "0.0",
+                    onChanged: viewModel.onInputChanged
+                )
+                
+                // Unit selection (side-by-side)
+                UnitSelector(
+                    fromUnit: $viewModel.fromUnit,
+                    toUnit: $viewModel.toUnit,
+                    availableUnits: viewModel.availableUnits,
+                    onSwap: viewModel.swapUnits
+                )
+                .onChange(of: viewModel.fromUnit) {
+                    viewModel.onFromUnitChanged()
+                }
+                .onChange(of: viewModel.toUnit) {
+                    viewModel.onToUnitChanged()
+                }
+                
+                // Result card (always visible) with temperature validation
+                VStack(spacing: KenyanTheme.Spacing.sm) {
+                    ConversionResult(
+                        value: viewModel.showResult ? viewModel.resultValue : 0,
+                        unit: viewModel.toUnit,
+                        description: viewModel.conversionDescription
+                    )
+                    
+                    // Kelvin validation warning
+                    if viewModel.hasKelvinError {
+                        HStack {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundColor(KenyanTheme.Colors.secondary)
+                            Text("Kelvin cannot be negative")
+                                .font(KenyanTheme.Typography.caption)
+                                .foregroundColor(KenyanTheme.Colors.secondary)
+                        }
+                        .padding(.horizontal, KenyanTheme.Spacing.md)
+                    }
+                }
+                
+                Spacer()
+                
+                // Reference strip
+                Text("0°C = 32°F • 100°C = 212°F")
+                    .font(KenyanTheme.Typography.caption)
+                    .foregroundColor(KenyanTheme.Colors.mutedText)
+                    .padding(.horizontal, KenyanTheme.Spacing.md)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(KenyanTheme.Colors.background)
+            .offset(y: keyboardOffset)
+            .animation(.easeInOut(duration: KenyanTheme.Animation.keyboard), value: keyboardOffset)
+            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { notification in
+                if let keyboardHeight = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue.height {
+                    keyboardOffset = -keyboardHeight * 0.15  // Subtle shift to keep result visible
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+                keyboardOffset = 0
+            }
             .onTapGesture {
                 hideKeyboard()
             }
         }
+        .navigationBarHidden(true)
     }
     
     private func hideKeyboard() {
