@@ -19,9 +19,12 @@ struct KenyanTheme {
         // Semantic colors (Design Refactor mapping)
         static let primary = kenyanGreen                      // Focus, selection, active states
         static let secondary = kenyanRed                      // Warnings, errors only
-        static let text = kenyanBlack                         // Primary text
-        static let background = kenyanWhite                   // Main background
         static let accent = kenyanGreen                       // Changed from red to green
+        
+        // Adaptive colors for light/dark mode
+        static let text = Color.primary                       // Adapts to dark mode
+        static let background = Color(UIColor.systemBackground) // Adapts to dark mode
+        static let adaptiveSurface = Color(UIColor.secondarySystemBackground) // Card surfaces
         
         // Neutrals (added for modern UI)
         static let surface = Color(hex: "#F7F7F7")           // Card/field surfaces

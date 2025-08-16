@@ -30,6 +30,13 @@ struct WeightConverterView: View {
                     onChanged: viewModel.onInputChanged
                 )
                 
+                // Quick preset values
+                PresetChips(
+                    inputValue: $viewModel.inputValue,
+                    presetValues: [1, 5, 10, 25, 50, 100],
+                    onChanged: viewModel.onInputChanged
+                )
+                
                 // Unit selection (side-by-side)
                 UnitSelector(
                     fromUnit: $viewModel.fromUnit,
@@ -53,11 +60,19 @@ struct WeightConverterView: View {
                 
                 Spacer()
                 
-                // Reference strip
-                Text("1 kg = 2.20462 lb")
-                    .font(KenyanTheme.Typography.caption)
-                    .foregroundColor(KenyanTheme.Colors.mutedText)
-                    .padding(.horizontal, KenyanTheme.Spacing.md)
+                // Tappable reference strip
+                Button(action: {
+                    UIPasteboard.general.string = "1 kg = 2.20462 lb"
+                    let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                    impactFeedback.impactOccurred()
+                }) {
+                    Text("1 kg = 2.20462 lb")
+                        .font(KenyanTheme.Typography.caption)
+                        .foregroundColor(KenyanTheme.Colors.mutedText)
+                        .underline()
+                }
+                .buttonStyle(PlainButtonStyle())
+                .padding(.horizontal, KenyanTheme.Spacing.md)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(KenyanTheme.Colors.background)

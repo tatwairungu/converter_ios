@@ -36,12 +36,28 @@ struct ConversionInput: View {
             
             // Input field with unit hint
             HStack(spacing: KenyanTheme.Spacing.sm) {
-                TextField(placeholder, text: $value)
+                TextField("", text: $value)
                     .textFieldStyle(PlainTextFieldStyle())
                     .keyboardType(.decimalPad)
                     .font(KenyanTheme.Typography.body)
                     .multilineTextAlignment(.trailing)
                     .focused($isFocused)
+                    .foregroundColor(KenyanTheme.Colors.text)
+                    .overlay(
+                        // Custom placeholder with improved contrast
+                        Group {
+                            if value.isEmpty {
+                                HStack {
+                                    Spacer()
+                                    Text(placeholder)
+                                        .foregroundColor(KenyanTheme.Colors.mutedText.opacity(0.8))
+                                        .font(KenyanTheme.Typography.body)
+                                        .allowsHitTesting(false)
+                                    Spacer()
+                                }
+                            }
+                        }
+                    )
                     .accessibilityLabel("Value input field for \(unit.name)")
                     .accessibilityHint("Enter the number you want to convert")
                     .onChange(of: value) {
@@ -57,20 +73,26 @@ struct ConversionInput: View {
                         }
                     }
                 
-                // Unit hint chip
+                // Live unit chip (updates with swaps)
                 Text(unitHint)
-                    .font(KenyanTheme.Typography.headline)
+                    .font(.caption)
+                    .fontWeight(.semibold)
                     .foregroundColor(KenyanTheme.Colors.primary)
                     .padding(.horizontal, KenyanTheme.Spacing.sm)
-                    .padding(.vertical, KenyanTheme.Spacing.xs)
+                    .padding(.vertical, 4)
                     .background(
-                        RoundedRectangle(cornerRadius: KenyanTheme.CornerRadius.small)
-                            .fill(KenyanTheme.Colors.surface)
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(KenyanTheme.Colors.primary.opacity(0.1))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(KenyanTheme.Colors.primary.opacity(0.3), lineWidth: 1)
+                            )
                     )
+                    .animation(.easeInOut(duration: 0.2), value: unit.symbol)
             }
             .padding()
             .frame(height: KenyanTheme.Spacing.inputHeight)
-            .background(KenyanTheme.Colors.surface)
+            .background(KenyanTheme.Colors.adaptiveSurface)
             .overlay(
                 RoundedRectangle(cornerRadius: KenyanTheme.CornerRadius.medium)
                     .stroke(

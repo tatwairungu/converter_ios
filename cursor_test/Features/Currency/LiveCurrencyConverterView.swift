@@ -98,12 +98,14 @@ struct LiveCurrencyConverterView: View {
                         )
                     }
                     
-                    // Currency status badges
+                    // Currency status badges with enhanced feedback
                     HStack {
                         if viewModel.isDataStale {
                             Label("Stale • Tap refresh", systemImage: "exclamationmark.triangle.fill")
                                 .font(KenyanTheme.Typography.caption)
                                 .foregroundColor(.orange)
+                                .opacity(viewModel.isVeryStale ? 0.6 : 1.0)
+                                .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: viewModel.isVeryStale)
                         } else if !viewModel.isOnline {
                             Label("Offline • Showing cached rates", systemImage: "wifi.slash")
                                 .font(KenyanTheme.Typography.caption)

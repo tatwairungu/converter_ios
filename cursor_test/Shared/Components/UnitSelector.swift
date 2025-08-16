@@ -52,9 +52,9 @@ struct UnitSelector: View {
             // Swap Button (centered below pickers)
             Button(action: performSwap) {
                 Image(systemName: "arrow.left.arrow.right")
-                    .font(.title2)
+                    .font(.title)
                     .foregroundColor(KenyanTheme.Colors.kenyanWhite)
-                    .frame(width: KenyanTheme.Spacing.swapButtonSize, height: KenyanTheme.Spacing.swapButtonSize)
+                    .frame(width: 36, height: 36)
                     .background(KenyanTheme.Colors.primary)
                     .clipShape(Circle())
                     .shadow(
@@ -63,7 +63,7 @@ struct UnitSelector: View {
                         x: KenyanTheme.Shadow.card.x,
                         y: KenyanTheme.Shadow.card.y
                     )
-                    .scaleEffect(isSwapping ? 0.95 : 1.0)
+                    .scaleEffect(isSwapping ? 0.9 : 1.0)
                     .rotationEffect(.degrees(isSwapping ? 180 : 0))
             }
             .frame(height: KenyanTheme.TouchTarget.minimum)
@@ -112,7 +112,7 @@ struct UnitSelector: View {
             }
             .padding(KenyanTheme.Spacing.sm)
             .frame(height: KenyanTheme.Spacing.inputHeight)
-            .background(KenyanTheme.Colors.surface)
+            .background(KenyanTheme.Colors.adaptiveSurface)
             .overlay(
                 RoundedRectangle(cornerRadius: KenyanTheme.CornerRadius.medium)
                     .stroke(KenyanTheme.Colors.border, lineWidth: 1)

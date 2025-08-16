@@ -65,6 +65,11 @@ class LiveCurrencyViewModel: ObservableObject {
         return exchangeRateService.isDataStale()
     }
     
+    var isVeryStale: Bool {
+        guard let lastUpdated = lastUpdated else { return true }
+        return Date().timeIntervalSince(lastUpdated) > 28800 // 8 hours
+    }
+    
     var isOnline: Bool {
         return exchangeRateService.checkConnection()
     }

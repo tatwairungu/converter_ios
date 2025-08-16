@@ -20,10 +20,27 @@ struct KenyanFlagHeader: View {
     
     var body: some View {
         HStack(spacing: KenyanTheme.Spacing.md) {
-            // Icon
-            Image(systemName: icon)
-                .font(.title2)
-                .foregroundColor(KenyanTheme.Colors.primary)
+            // Icon with subtle Kenyan flag branding
+            ZStack {
+                // Centered flag stripe background (behind icon)
+                VStack(spacing: 1) {
+                    Rectangle()
+                        .fill(KenyanTheme.Colors.kenyanBlack)
+                        .frame(width: 24, height: 2)
+                    Rectangle()
+                        .fill(KenyanTheme.Colors.secondary)
+                        .frame(width: 24, height: 2)
+                    Rectangle()
+                        .fill(KenyanTheme.Colors.primary)
+                        .frame(width: 24, height: 2)
+                }
+                .opacity(0.15)
+                
+                // Icon in front
+                Image(systemName: icon)
+                    .font(.title2)
+                    .foregroundColor(KenyanTheme.Colors.primary)
+            }
             
             // Title and subtitle
             VStack(alignment: .leading, spacing: 2) {

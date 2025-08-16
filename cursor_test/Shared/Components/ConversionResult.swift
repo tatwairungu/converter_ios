@@ -46,17 +46,17 @@ struct ConversionResult: View {
             HStack(alignment: .lastTextBaseline, spacing: KenyanTheme.Spacing.sm) {
                 if isEmpty {
                     Text("—")
-                        .font(KenyanTheme.Typography.result)
+                        .font(.system(size: 44, weight: .bold, design: .rounded))
                         .foregroundColor(KenyanTheme.Colors.mutedText)
                 } else {
                     Text(formattedValue)
-                        .font(KenyanTheme.Typography.result)
+                        .font(.system(size: 44, weight: .bold, design: .rounded))
                         .foregroundColor(KenyanTheme.Colors.text)
-                        .fontWeight(.bold)
                     
                     Text(unit.symbol)
-                        .font(KenyanTheme.Typography.title)
+                        .font(.system(size: 20, weight: .medium))
                         .foregroundColor(KenyanTheme.Colors.mutedText)
+                        .opacity(0.8)
                 }
                 
                 Spacer()
@@ -104,7 +104,7 @@ struct ConversionResult: View {
         .padding(KenyanTheme.Spacing.md)
         .frame(minHeight: KenyanTheme.Spacing.resultHeight)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(KenyanTheme.Colors.surface)
+        .background(KenyanTheme.Colors.adaptiveSurface)
         .overlay(
             RoundedRectangle(cornerRadius: KenyanTheme.CornerRadius.medium)
                 .stroke(KenyanTheme.Colors.border, lineWidth: 1)
@@ -133,8 +133,16 @@ struct ConversionResult: View {
     private func copyToClipboard() {
         UIPasteboard.general.string = copyText
         
-        // Haptic feedback
+        // Enhanced haptic feedback - more noticeable click
+        let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+        impactFeedback.prepare()
         impactFeedback.impactOccurred()
+        
+        // Success haptic
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            let successFeedback = UINotificationFeedbackGenerator()
+            successFeedback.notificationOccurred(.success)
+        }
         
         // Show copied confirmation
         withAnimation(.easeInOut(duration: KenyanTheme.Animation.standard)) {
