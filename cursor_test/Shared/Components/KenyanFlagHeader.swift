@@ -9,42 +9,39 @@ import SwiftUI
 
 struct KenyanFlagHeader: View {
     let title: String
-    let subtitle: String
+    let subtitle: String?
     let icon: String
     
+    init(title: String, subtitle: String? = nil, icon: String) {
+        self.title = title
+        self.subtitle = subtitle
+        self.icon = icon
+    }
+    
     var body: some View {
-        VStack(spacing: KenyanTheme.Spacing.md) {
-            // Flag-inspired header bar
-            HStack(spacing: 0) {
-                Rectangle()
-                    .fill(KenyanTheme.Colors.kenyanBlack)
-                    .frame(height: 8)
-                Rectangle()
-                    .fill(KenyanTheme.Colors.kenyanRed)
-                    .frame(height: 8)
-                Rectangle()
-                    .fill(KenyanTheme.Colors.kenyanGreen)
-                    .frame(height: 8)
-            }
-            .cornerRadius(4)
-            .padding(.horizontal)
+        HStack(spacing: KenyanTheme.Spacing.md) {
+            // Icon
+            Image(systemName: icon)
+                .font(.title2)
+                .foregroundColor(KenyanTheme.Colors.primary)
             
-            // Icon and titles
-            VStack(spacing: KenyanTheme.Spacing.sm) {
-                Image(systemName: icon)
-                    .font(.system(size: 60))
-                    .foregroundColor(KenyanTheme.Colors.primary)
-                
+            // Title and subtitle
+            VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(KenyanTheme.Typography.largeTitle)
+                    .font(KenyanTheme.Typography.title)
                     .foregroundColor(KenyanTheme.Colors.text)
+                    .fontWeight(.semibold)
                 
-                Text(subtitle)
-                    .font(KenyanTheme.Typography.headline)
-                    .foregroundColor(KenyanTheme.Colors.secondary)
-                    .fontWeight(.medium)
+                if let subtitle = subtitle {
+                    Text(subtitle)
+                        .font(KenyanTheme.Typography.caption)
+                        .foregroundColor(KenyanTheme.Colors.mutedText)
+                }
             }
+            
+            Spacer()
         }
-        .padding(.top, KenyanTheme.Spacing.lg)
+        .padding(.horizontal, KenyanTheme.Spacing.md)
+        .frame(height: KenyanTheme.Spacing.headerHeight)
     }
 }

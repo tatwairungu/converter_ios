@@ -14,6 +14,7 @@ class TemperatureConverterViewModel: ObservableObject {
     @Published var showResult: Bool = false
     @Published var fromUnit: ConversionUnit = .celsius
     @Published var toUnit: ConversionUnit = .fahrenheit
+    @Published var hasKelvinError: Bool = false
     
     let availableUnits: [ConversionUnit] = [
         .celsius, .fahrenheit, .kelvin
@@ -58,11 +59,22 @@ class TemperatureConverterViewModel: ObservableObject {
     func performConversion() {
         guard let inputDouble = Double(inputValue) else {
             showResult = false
+            hasKelvinError = false
             return
         }
         
+        // Check for Kelvin validation
+        hasKelvinError = (toUnit.id == "k" && resultValue < 0) || 
+                        (fromUnit.id == "k" && inputDouble < 0)
+        
         // Temperature conversions are not linear, need special handling
         resultValue = convertTemperature(value: inputDouble, from: fromUnit, to: toUnit)
+        
+        // Recheck Kelvin error after conversion
+        if toUnit.id == "k" && resultValue < 0 {
+            hasKelvinError = true
+        }
+        
         showResult = true
     }
     

@@ -26,6 +26,7 @@ public protocol ExchangeRateServiceProtocol {
     func getCachedRates() -> [String: Double]?
     func getLastUpdateTime() -> Date?
     func isDataStale() -> Bool
+    func checkConnection() -> Bool
 }
 
 // MARK: - Exchange Rate Service Implementation
@@ -152,5 +153,9 @@ public class ExchangeRateService: ExchangeRateServiceProtocol, ObservableObject 
         } else {
             return "\(minutes)m ago"
         }
+    }
+    
+    public func checkConnection() -> Bool {
+        return networkService.checkConnection()
     }
 }

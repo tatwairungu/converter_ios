@@ -65,6 +65,20 @@ class LiveCurrencyViewModel: ObservableObject {
         return exchangeRateService.isDataStale()
     }
     
+    var isOnline: Bool {
+        return exchangeRateService.checkConnection()
+    }
+    
+    var lastUpdateTimeFormatted: String {
+        if let lastUpdated = lastUpdated {
+            let formatter = DateFormatter()
+            formatter.timeStyle = .short
+            return formatter.string(from: lastUpdated)
+        } else {
+            return "Never"
+        }
+    }
+    
     // MARK: - Public Methods
     
     func performConversion() {

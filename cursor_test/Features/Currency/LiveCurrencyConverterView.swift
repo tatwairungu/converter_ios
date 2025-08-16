@@ -11,174 +11,143 @@ struct LiveCurrencyConverterView: View {
     @StateObject private var viewModel = LiveCurrencyViewModel()
     @State private var showingError = false
     
+    @State private var keyboardOffset: CGFloat = 0
+    
     var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(spacing: KenyanTheme.Spacing.lg) {
-                    // Header with Kenyan Flag Colors
+        VStack(spacing: 0) {
+            // Above-the-fold layout (no scrolling needed)
+            VStack(spacing: KenyanTheme.Spacing.lg) {
+                // Header
+                HStack {
                     KenyanFlagHeader(
                         title: viewModel.title,
                         subtitle: viewModel.subtitle,
                         icon: ConverterType.currency.icon
                     )
                     
-                    // Data Status Indicator
-                    if viewModel.isDataStale {
-                        HStack {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundColor(.orange)
-                            Text("Data may be outdated - tap refresh for latest rates")
-                                .font(.caption)
-                                .foregroundColor(.orange)
-                        }
-                        .padding(.horizontal)
-                    }
+                    Spacer()
                     
-                    // Input Section
-                    ConversionInput(
-                        value: $viewModel.inputValue,
-                        unit: viewModel.fromUnit,
-                        placeholder: "0.0",
-                        onChanged: viewModel.onInputChanged
-                    )
-                    
-                    // Unit Selection
-                    UnitSelector(
-                        fromUnit: $viewModel.fromUnit,
-                        toUnit: $viewModel.toUnit,
-                        availableUnits: viewModel.availableUnits,
-                        onSwap: viewModel.swapUnits
-                    )
-                    .onChange(of: viewModel.fromUnit) {
-                        viewModel.onFromUnitChanged()
-                    }
-                    .onChange(of: viewModel.toUnit) {
-                        viewModel.onToUnitChanged()
-                    }
-                    
-                    // Refresh Button
+                    // Manual refresh button (small, circular)
                     Button(action: {
                         Task {
                             await viewModel.refreshExchangeRates()
                         }
                     }) {
-                        HStack {
-                            if viewModel.isLoading {
-                                ProgressView()
-                                    .scaleEffect(0.8)
-                                    .foregroundColor(KenyanTheme.Colors.background)
-                            } else {
-                                Image(systemName: "arrow.clockwise")
-                            }
-                            Text(viewModel.refreshButtonText)
+                        if viewModel.isLoading {
+                            ProgressView()
+                                .scaleEffect(0.7)
+                        } else {
+                            Image(systemName: "arrow.clockwise")
+                                .font(.title3)
                         }
-                        .font(.headline)
-                        .foregroundColor(KenyanTheme.Colors.background)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(
-                            LinearGradient(
-                                gradient: Gradient(colors: [
-                                    KenyanTheme.Colors.primary,
-                                    viewModel.isDataStale ? .orange : KenyanTheme.Colors.primary
-                                ]),
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .cornerRadius(KenyanTheme.CornerRadius.medium)
+                    }
+                    .foregroundColor(KenyanTheme.Colors.primary)
+                    .frame(width: KenyanTheme.TouchTarget.minimum, height: KenyanTheme.TouchTarget.minimum)
+                    .disabled(viewModel.isLoading)
+                    .padding(.trailing, KenyanTheme.Spacing.md)
+                }
+                
+                // Value input
+                ConversionInput(
+                    value: $viewModel.inputValue,
+                    unit: viewModel.fromUnit,
+                    placeholder: "0.0",
+                    onChanged: viewModel.onInputChanged
+                )
+                
+                // Unit selection (side-by-side)
+                UnitSelector(
+                    fromUnit: $viewModel.fromUnit,
+                    toUnit: $viewModel.toUnit,
+                    availableUnits: viewModel.availableUnits,
+                    onSwap: viewModel.swapUnits
+                )
+                .onChange(of: viewModel.fromUnit) {
+                    viewModel.onFromUnitChanged()
+                }
+                .onChange(of: viewModel.toUnit) {
+                    viewModel.onToUnitChanged()
+                }
+                
+                // Result card (always visible) with currency states
+                VStack(spacing: KenyanTheme.Spacing.sm) {
+                    if viewModel.isLoading {
+                        // Loading skeleton
+                        HStack {
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(KenyanTheme.Colors.border)
+                                .frame(width: 120, height: 40)
+                                .opacity(0.3)
+                                .animation(.easeInOut(duration: 1.2).repeatForever(), value: viewModel.isLoading)
+                            
+                            Spacer()
+                        }
+                        .padding(KenyanTheme.Spacing.md)
+                        .frame(minHeight: KenyanTheme.Spacing.resultHeight)
+                        .background(KenyanTheme.Colors.surface)
                         .overlay(
                             RoundedRectangle(cornerRadius: KenyanTheme.CornerRadius.medium)
-                                .stroke(KenyanTheme.Colors.secondary, lineWidth: 2)
+                                .stroke(KenyanTheme.Colors.border, lineWidth: 1)
+                        )
+                        .padding(.horizontal, KenyanTheme.Spacing.md)
+                    } else {
+                        ConversionResult(
+                            value: viewModel.showResult ? viewModel.resultValue : 0,
+                            unit: viewModel.toUnit,
+                            description: viewModel.conversionDescription
                         )
                     }
-                    .disabled(viewModel.isLoading)
-                    .padding(.horizontal)
                     
-                    // Result Section
-                    if viewModel.showResult && !viewModel.inputValue.isEmpty {
-                        VStack(spacing: KenyanTheme.Spacing.sm) {
-                            ConversionResult(
-                                value: viewModel.resultValue,
-                                unit: viewModel.toUnit,
-                                description: viewModel.conversionDescription
-                            )
-                            
-                            // Exchange Rate Info
-                            VStack(spacing: KenyanTheme.Spacing.xs) {
-                                Text(viewModel.getConversionRate())
-                                    .font(KenyanTheme.Typography.caption)
-                                    .foregroundColor(KenyanTheme.Colors.secondary)
-                                    .fontWeight(.medium)
-                                
-                                Text("Data age: \(viewModel.dataAge)")
-                                    .font(.caption2)
-                                    .foregroundColor(.gray)
-                            }
-                            .padding(.horizontal)
+                    // Currency status badges
+                    HStack {
+                        if viewModel.isDataStale {
+                            Label("Stale • Tap refresh", systemImage: "exclamationmark.triangle.fill")
+                                .font(KenyanTheme.Typography.caption)
+                                .foregroundColor(.orange)
+                        } else if !viewModel.isOnline {
+                            Label("Offline • Showing cached rates", systemImage: "wifi.slash")
+                                .font(KenyanTheme.Typography.caption)
+                                .foregroundColor(KenyanTheme.Colors.secondary)
                         }
+                        Spacer()
                     }
-                    
-                    // Loading State
-                    if viewModel.isLoading {
-                        VStack(spacing: KenyanTheme.Spacing.sm) {
-                            ProgressView()
-                                .scaleEffect(1.2)
-                            Text("Fetching live exchange rates...")
-                                .font(KenyanTheme.Typography.body)
-                                .foregroundColor(KenyanTheme.Colors.text)
-                        }
-                        .padding()
-                    }
-                    
-                    Spacer(minLength: KenyanTheme.Spacing.xl)
-                    
-                    // Info Section with Kenyan Flag Accent
-                    VStack(spacing: KenyanTheme.Spacing.sm) {
-                        HStack(spacing: 0) {
-                            Rectangle()
-                                .fill(KenyanTheme.Colors.kenyanBlack)
-                                .frame(width: 30, height: 4)
-                            Rectangle()
-                                .fill(KenyanTheme.Colors.secondary)
-                                .frame(width: 30, height: 4)
-                            Rectangle()
-                                .fill(KenyanTheme.Colors.primary)
-                                .frame(width: 30, height: 4)
-                        }
-                        .cornerRadius(2)
-                        
-                        Text(viewModel.conversionInfo)
-                            .font(KenyanTheme.Typography.caption)
-                            .foregroundColor(KenyanTheme.Colors.text)
-                            .fontWeight(.medium)
-                            .multilineTextAlignment(.center)
-                    }
-                    .padding(.bottom)
+                    .padding(.horizontal, KenyanTheme.Spacing.md)
                 }
-                .padding(.vertical)
+                
+                Spacer()
+                
+                // Reference strip with last updated time
+                Text("Rates cached every 4h • Last updated: \(viewModel.lastUpdateTimeFormatted)")
+                    .font(KenyanTheme.Typography.caption)
+                    .foregroundColor(KenyanTheme.Colors.mutedText)
+                    .padding(.horizontal, KenyanTheme.Spacing.md)
             }
-            .background(
-                LinearGradient(
-                    gradient: Gradient(colors: [KenyanTheme.Colors.background, Color.gray.opacity(0.05)]),
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            )
-            .navigationBarHidden(true)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(KenyanTheme.Colors.background)
+            .offset(y: keyboardOffset)
+            .animation(.easeInOut(duration: KenyanTheme.Animation.keyboard), value: keyboardOffset)
+            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { notification in
+                if let keyboardHeight = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue.height {
+                    keyboardOffset = -keyboardHeight * 0.15  // Subtle shift to keep result visible
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+                keyboardOffset = 0
+            }
             .onTapGesture {
                 hideKeyboard()
             }
-            .alert("Currency Error", isPresented: $showingError) {
-                Button("OK") {
-                    showingError = false
-                }
-            } message: {
-                Text(viewModel.errorMessage ?? "Unknown error occurred")
+        }
+        .navigationBarHidden(true)
+        .alert("Currency Error", isPresented: $showingError) {
+            Button("OK") {
+                showingError = false
             }
-            .onChange(of: viewModel.errorMessage) {
-                showingError = viewModel.errorMessage != nil
-            }
+        } message: {
+            Text(viewModel.errorMessage ?? "Unknown error occurred")
+        }
+        .onChange(of: viewModel.errorMessage) {
+            showingError = viewModel.errorMessage != nil
         }
     }
     
