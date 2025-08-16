@@ -206,3 +206,8 @@ GoogleService-Info.plist
 
 # Crash reports
 *.crash
+
+# Documentation files
+DESIGN_REFACTOR.md
+PLAN.md
+ARCHITECTURE.md
